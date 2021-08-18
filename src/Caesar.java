@@ -38,13 +38,13 @@ public class Caesar {
 		int[] shifted = new int[inp.length()];
 
 		for (int i = 0; i < shifted.length; i++) {
-			shifted[i] = inp.codePointAt(i) + key % 26;
+			shifted[i] = (inp.codePointAt(i) + key - 97) % 26;
 		}
 
 		String out = "";
 
 		for (int i : shifted) {
-			out = out + Character.toChars(i)[0];
+			out = out + Character.toChars((i < 0 ? i + 26 : i) + 97)[0];
 			;
 		}
 
