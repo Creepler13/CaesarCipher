@@ -3,11 +3,13 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		Caesar c = new Caesar(1233);
-		
+		Krypto k = new Krypto();
+
+		k.caesar.setKey(1233);
+
 		String klarText = "test";
-		String encoded = c.encodeCaesar(klarText);
-		String decoded = c.decodeCaesar(encoded);
+		String encoded = k.caesar.encodeCaesar(klarText);
+		String decoded = k.caesar.decodeCaesar(encoded);
 
 		System.out.println(klarText);
 		System.out.println(encoded);
