@@ -1,11 +1,20 @@
+import java.math.BigDecimal;
 
 public class Main {
 
 	public static void main(String[] args) {
 
-
-		
 		Krypto k = new Krypto();
+
+		k.rsa.setPrime(43, 67);
+
+		int number = 1001;
+		BigDecimal encodedrsa = k.rsa.encrypt(number);
+		BigDecimal decodedrsa = k.rsa.decrypt(encodedrsa);
+
+		System.out.println(number);
+		System.out.println(encodedrsa);
+		System.out.println(decodedrsa);
 
 		k.vigenere.setKey("senf");
 
