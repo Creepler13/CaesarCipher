@@ -1,4 +1,4 @@
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class Main {
 
@@ -8,9 +8,9 @@ public class Main {
 
 		k.rsa.setPrime(43, 67);
 
-		int number = 1001;
-		BigDecimal encodedrsa = k.rsa.encrypt(number);
-		BigDecimal decodedrsa = k.rsa.decrypt(encodedrsa);
+		String number = "1512525561111";
+		String encodedrsa = k.rsa.encrypt(number);
+		String decodedrsa = k.rsa.decrypt(encodedrsa);
 
 		System.out.println(number);
 		System.out.println(encodedrsa);

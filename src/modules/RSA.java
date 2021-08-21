@@ -1,29 +1,29 @@
 package modules;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class RSA {
 
-	private BigDecimal e, euler, n, d, p1, p2;
+	private BigInteger e, euler, n, d, p1, p2;
 
-	private BigDecimal zero = new BigDecimal(0), one = new BigDecimal(1);
+	private BigInteger zero = BigInteger.ZERO, one = BigInteger.ONE;
 
 	public void setPrime(int a, int b) {
-		p1 = new BigDecimal(a);
-		p2 = new BigDecimal(b);
+		p1 = new BigDecimal(a).toBigInteger();
+		p2 = new BigDecimal(b).toBigInteger();
 		euler = (one.subtract(p1)).multiply(one.subtract(p2));
 		n = p1.multiply(p2);
 		setED(zero);
-		System.out.println(e + " " + d);
 	}
 
-	private void setED(BigDecimal skipNum) {
+	private void setED(BigInteger skipNum) {
 		e = getE(skipNum);
 		d = getD();
 	}
 
-	private BigDecimal getE(BigDecimal skipNum) {
-		BigDecimal e = zero;
+	private BigInteger getE(BigInteger skipNum) {
+		BigInteger e = zero;
 		while (true) {
 			if (e.compareTo(one) == 1 && e.compareTo(euler) == -1 && ggt(e, euler).compareTo(one) == 0
 					&& e.compareTo(skipNum) == 1)
@@ -32,24 +32,23 @@ public class RSA {
 		}
 	}
 
-	private BigDecimal getD() {
-		BigDecimal d = zero;
-		BigDecimal s = one;
-		while (true) {
-			d = s.multiply(euler).add(one).divide(e);
+	private BigInteger getD() {
+		BigInteger d = zero;
+		BigInteger s = zero;
+
+		while (!(d.compareTo(euler) <= 0 && e.multiply(d).mod(euler).compareTo(one) == 0)) {
+			d = (s.multiply(euler).add(one)).divide(e);
 			s = s.add(one);
-			if (d.compareTo(euler) <= 0 && e.multiply(d).remainder(euler).compareTo(one) == 0)
-				return d;
-			if (d.compareTo(euler) == 1)
-				setED(e);
 
 		}
+
+		return d;
 	}
 
-	public BigDecimal ggt(BigDecimal a, BigDecimal b) {
+	public BigInteger ggt(BigInteger a, BigInteger b) {
 
 		while (!(b.compareTo(zero) == 0)) {
-			BigDecimal h = a.remainder(b);
+			BigInteger h = a.mod(b);
 			a = b;
 			b = h;
 		}
@@ -58,41 +57,64 @@ public class RSA {
 
 	}
 
-	public BigDecimal encrypt(BigDecimal number) {
-		if (n.compareTo(number) < 0)
-			System.out.println("warning input " + number + " is to great");
-		return bigMath(number, e, n);
+	public String encrypt(String number) {
+		return splitEncryptBigMath(number);
 	}
 
-	public BigDecimal decrypt(BigDecimal number) {
-		return bigMath(number, d, n);
+	public String decrypt(String number) {
+		return splitDecryptBigMath(number);
 	}
 
-	public BigDecimal encrypt(int number) {
-		BigDecimal num = new BigDecimal(number);
-		if (n.compareTo(num) < 0)
-			System.out.println("warning input " + num + " is to great");
-		return bigMath(num, e, n);
-	}
-
-	public BigDecimal decrypt(int number) {
-		return bigMath(new BigDecimal(number), d, n);
-	}
-
-	private BigDecimal bigMath(BigDecimal a, BigDecimal b, BigDecimal c) {
-
-		BigDecimal Bi = a;
+	private BigInteger bigMath(BigInteger a, BigInteger b, BigInteger c) {
+		BigInteger Bi = a;
 		Bi = Bi.pow(b.intValue());
-		Bi = Bi.remainder(c);
+		Bi = Bi.mod(c);
 		return Bi;
 	}
 
-	private String bigMathText(String text, BigDecimal b, BigDecimal c) {
-		int[] temp = new int[text.length()];
-		for (int i = 0; i < text.length(); i++) {
-			int ut = text.codePointAt(i);
-			temp[i] = ut < 100 ? ut < 10 ? ut * 100 : ut * 10 : ut;
+	private String splitEncryptBigMath(String input) {
+
+		String[] tempSplit = new String[(int) Math.ceil((double) input.length() / 3)];
+
+		for (int i = 0; i < tempSplit.length; i++) {
+			tempSplit[i] = "" + input.charAt(i * 3);
+			if (i * 3 + 1 < input.length())
+				tempSplit[i] = tempSplit[i] + input.charAt(i * 3 + 1);
+			if (i * 3 + 2 < input.length())
+				tempSplit[i] = tempSplit[i] + input.charAt(i * 3 + 2);
+		
 		}
+
+		BigInteger[] splitInput = new BigInteger[tempSplit.length];
+		for (int i = 0; i < tempSplit.length; i++) {
+
+			splitInput[i] = bigMath(new BigInteger(tempSplit[i]), e, n);
+		}
+
+		String s = "";
+
+		for (BigInteger bigInteger : splitInput) {
+			s = s + " " + bigInteger;
+		}
+
+		return s.trim();
+
+	}
+
+	private String splitDecryptBigMath(String input) {
+		String[] splitInputS = input.split(" ");
+		BigInteger[] splitInput = new BigInteger[splitInputS.length];
+		for (int i = 0; i < splitInputS.length; i++) {
+			splitInput[i] = bigMath(new BigInteger(splitInputS[i]), d, n);
+		}
+
+		String s = "";
+
+		for (BigInteger bigInteger : splitInput) {
+			s = s + bigInteger;
+		}
+
+		return s;
 
 	}
 
