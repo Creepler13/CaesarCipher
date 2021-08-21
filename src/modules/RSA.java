@@ -77,12 +77,12 @@ public class RSA {
 		String[] tempSplit = new String[(int) Math.ceil((double) input.length() / 3)];
 
 		for (int i = 0; i < tempSplit.length; i++) {
-			tempSplit[i] = "" + input.charAt(i * 3);
+			tempSplit[i] = "1" + input.charAt(i * 3);
 			if (i * 3 + 1 < input.length())
 				tempSplit[i] = tempSplit[i] + input.charAt(i * 3 + 1);
 			if (i * 3 + 2 < input.length())
 				tempSplit[i] = tempSplit[i] + input.charAt(i * 3 + 2);
-		
+
 		}
 
 		BigInteger[] splitInput = new BigInteger[tempSplit.length];
@@ -111,7 +111,7 @@ public class RSA {
 		String s = "";
 
 		for (BigInteger bigInteger : splitInput) {
-			s = s + bigInteger;
+			s = s + bigInteger.toString().replaceFirst("1", "");
 		}
 
 		return s;

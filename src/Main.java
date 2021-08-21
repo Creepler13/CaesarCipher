@@ -8,7 +8,7 @@ public class Main {
 
 		k.rsa.setPrime(43, 67);
 
-		String number = "1512525561111";
+		String number = "15125255600000001111";
 		String encodedrsa = k.rsa.encrypt(number);
 		String decodedrsa = k.rsa.decrypt(encodedrsa);
 
