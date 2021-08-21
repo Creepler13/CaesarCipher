@@ -57,14 +57,6 @@ public class RSA {
 
 	}
 
-	public String encrypt(String number) {
-		return splitEncryptBigMath(number);
-	}
-
-	public String decrypt(String number) {
-		return splitDecryptBigMath(number);
-	}
-
 	private BigInteger bigMath(BigInteger a, BigInteger b, BigInteger c) {
 		BigInteger Bi = a;
 		Bi = Bi.pow(b.intValue());
@@ -72,8 +64,44 @@ public class RSA {
 		return Bi;
 	}
 
-	private String splitEncryptBigMath(String input) {
+	private String splitEncryptBigMath(String[] input) {
+		String s = "";
 
+		for (int i = 0; i < input.length; i++) {
+			s = s + " " + bigMath(new BigInteger(input[i]), e, n);
+
+		}
+
+		return s.trim();
+
+	}
+
+	private String splitDecryptBigMath(String[] input) {
+		String s = "";
+
+		for (int i = 0; i < input.length; i++) {
+			s = s + bigMath(new BigInteger(input[i]), d, n).toString().replaceFirst("1", "");
+		}
+
+		return s;
+
+	}
+
+	private String splitDecryptTextBigMath(String[] input) {
+		String s = "";
+
+		for (int i = 0; i < input.length; i = i + 2) {
+			s = s + Character.toChars(
+					Integer.parseInt(bigMath(new BigInteger(input[i]), d, n).toString().replaceFirst("1", "")))[0]
+					+ Character.toChars(Integer
+							.parseInt(bigMath(new BigInteger(input[i + 1]), d, n).toString().replaceFirst("1", "")))[0];
+		}
+
+		return s;
+
+	}
+
+	private String[] splitENum(String input) {
 		String[] tempSplit = new String[(int) Math.ceil((double) input.length() / 3)];
 
 		for (int i = 0; i < tempSplit.length; i++) {
@@ -84,38 +112,59 @@ public class RSA {
 				tempSplit[i] = tempSplit[i] + input.charAt(i * 3 + 2);
 
 		}
-
-		BigInteger[] splitInput = new BigInteger[tempSplit.length];
-		for (int i = 0; i < tempSplit.length; i++) {
-
-			splitInput[i] = bigMath(new BigInteger(tempSplit[i]), e, n);
-		}
-
-		String s = "";
-
-		for (BigInteger bigInteger : splitInput) {
-			s = s + " " + bigInteger;
-		}
-
-		return s.trim();
-
+		return tempSplit;
 	}
 
-	private String splitDecryptBigMath(String input) {
-		String[] splitInputS = input.split(" ");
-		BigInteger[] splitInput = new BigInteger[splitInputS.length];
-		for (int i = 0; i < splitInputS.length; i++) {
-			splitInput[i] = bigMath(new BigInteger(splitInputS[i]), d, n);
+	private String[] splitDNum(String input) {
+		return input.split(" ");
+	}
+
+	private String[] splitEText(String input) {
+		String[] temp = new String[input.length() * 2];
+		for (int i = 0; i < temp.length; i = i + 2) {
+			String tempString = "";
+
+			tempString = "" + input.codePointAt(i / 2);
+
+			while (tempString.length() < 5) {
+				tempString = 0 + tempString;
+			}
+			tempString = 1 + tempString;
+
+			temp[i] = tempString.substring(0, 3);
+			temp[i + 1] = tempString.substring(3, 6);
 		}
+		return temp;
+	}
 
-		String s = "";
+	private String[] splitDText(String input) {
+		return input.split(" ");
+	}
 
-		for (BigInteger bigInteger : splitInput) {
-			s = s + bigInteger.toString().replaceFirst("1", "");
-		}
+	// ---------------------- Access
 
-		return s;
+	public String encryptNumber(String number) {
+		return splitEncryptBigMath(splitENum(number));
+	}
 
+	public String encryptNumber(int number) {
+		return splitEncryptBigMath(splitENum("" + number));
+	}
+
+	public String encryptNumber(BigInteger number) {
+		return splitEncryptBigMath(splitENum(number.toString()));
+	}
+
+	public String decryptNumber(String encryptedNumber) {
+		return splitDecryptBigMath(splitDNum(encryptedNumber));
+	}
+
+	public String encryptText(String text) {
+		return splitEncryptBigMath(splitEText(text));
+	}
+
+	public String decryptText(String encryptedText) {
+		return splitDecryptTextBigMath(splitDText(encryptedText));
 	}
 
 }
