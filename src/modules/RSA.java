@@ -1,7 +1,7 @@
 package modules;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 public class RSA {
 
@@ -9,12 +9,33 @@ public class RSA {
 
 	private BigInteger zero = BigInteger.ZERO, one = BigInteger.ONE;
 
-	public void setPrime(int a, int b) {
-		p1 = new BigDecimal(a).toBigInteger();
-		p2 = new BigDecimal(b).toBigInteger();
+	public void generateKeys(BigInteger a, BigInteger b) {
+		p1 = a;
+		p2 = b;
 		euler = (one.subtract(p1)).multiply(one.subtract(p2));
 		n = p1.multiply(p2);
 		setED(zero);
+	}
+
+	private void setPublicKey(BigInteger part1, BigInteger part2) {
+		e = part1;
+		n = part2;
+
+	}
+
+	private void setPrivateKey(BigInteger key, BigInteger publicPart2) {
+		d = key;
+		n = publicPart2;
+
+	}
+
+	public BigInteger[] getPublicKey() {
+		BigInteger[] temp = { e, n };
+		return temp;
+	}
+
+	public BigInteger getPrivateKey() {
+		return d;
 	}
 
 	private void setED(BigInteger skipNum) {
@@ -91,10 +112,10 @@ public class RSA {
 		String s = "";
 
 		for (int i = 0; i < input.length; i = i + 2) {
-			s = s + Character.toChars(
-					Integer.parseInt(bigMath(new BigInteger(input[i]), d, n).toString().replaceFirst("1", "")))[0]
-					+ Character.toChars(Integer
-							.parseInt(bigMath(new BigInteger(input[i + 1]), d, n).toString().replaceFirst("1", "")))[0];
+			String one = bigMath(new BigInteger(input[i]), d, n).toString().replaceFirst("1", "");
+			String two = bigMath(new BigInteger(input[i + 1]), d, n).toString();
+
+			s = s + Character.toChars(Integer.parseInt(one + two))[0];
 		}
 
 		return s;
@@ -102,24 +123,26 @@ public class RSA {
 	}
 
 	private String[] splitENum(String input) {
-		String[] tempSplit = new String[(int) Math.ceil((double) input.length() / 3)];
 
-		for (int i = 0; i < tempSplit.length; i++) {
-			tempSplit[i] = "1" + input.charAt(i * 3);
-			if (i * 3 + 1 < input.length())
-				tempSplit[i] = tempSplit[i] + input.charAt(i * 3 + 1);
-			if (i * 3 + 2 < input.length())
-				tempSplit[i] = tempSplit[i] + input.charAt(i * 3 + 2);
-
+		ArrayList<String> list = new ArrayList<>();
+		String temp = "1";
+		for (int i = 0; i < input.length(); i++) {
+			if (new BigInteger(temp + input.charAt(i)).compareTo(n) > 0) {
+				list.add(temp);
+				temp = "1";
+			}
+			temp = temp + input.charAt(i);
 		}
-		return tempSplit;
+		list.add(temp);
+		return list.toArray(new String[list.size()]);
+
 	}
 
 	private String[] splitDNum(String input) {
 		return input.split(" ");
 	}
 
-	private String[] splitEText(String input) {
+	private String[] splitETextUTF8(String input) {
 		String[] temp = new String[input.length() * 2];
 		for (int i = 0; i < temp.length; i = i + 2) {
 			String tempString = "";
@@ -133,6 +156,21 @@ public class RSA {
 
 			temp[i] = tempString.substring(0, 3);
 			temp[i + 1] = tempString.substring(3, 6);
+		}
+		return temp;
+	}
+
+	private String[] splitEText(String input) {
+		String[] temp = new String[input.length()];
+		for (int i = 0; i < temp.length; i++) {
+			String tempString = "";
+
+			tempString = "" + input.codePointAt(i);
+
+			tempString = 1 + tempString;
+
+			temp[i] = tempString;
+
 		}
 		return temp;
 	}
@@ -164,6 +202,14 @@ public class RSA {
 	}
 
 	public String decryptText(String encryptedText) {
+		return splitDecryptTextBigMath(splitDText(encryptedText));
+	}
+
+	public String encryptTextFullUTF8(String text) {
+		return splitEncryptBigMath(splitETextUTF8(text));
+	}
+
+	public String decryptTextFullUTF8(String encryptedText) {
 		return splitDecryptTextBigMath(splitDText(encryptedText));
 	}
 

@@ -1,12 +1,17 @@
+import java.math.BigInteger;
+
 public class Main {
 
 	public static void main(String[] args) {
 
 		Krypto k = new Krypto();
 
-		k.rsa.setPrime(43, 67);
+		k.rsa.generateKeys(new BigInteger("863"), new BigInteger("367"));
 
-		String number = "15125255600000001111";
+		System.out.println("private key " + k.rsa.getPrivateKey());
+		System.out.println("public key " + k.rsa.getPublicKey()[0] + " " + k.rsa.getPublicKey()[1]);
+
+		String number = "1015151515154158749852";
 		String encodedrsa = k.rsa.encryptNumber(number);
 		String decodedrsa = k.rsa.decryptNumber(encodedrsa);
 
@@ -15,9 +20,9 @@ public class Main {
 		System.out.println(encodedrsa);
 		System.out.println(decodedrsa);
 
-		String text = "Tesst";
-		String encodedrsaText = k.rsa.encryptText(text);
-		String decodedrsaText = k.rsa.decryptText(encodedrsaText);
+		String text = "musik ist der atem der seele";
+		String encodedrsaText = k.rsa.encryptTextFullUTF8(text);
+		String decodedrsaText = k.rsa.decryptTextFullUTF8(encodedrsaText);
 
 		System.out.println("\nRSA Text");
 		System.out.println(text);
