@@ -17,13 +17,25 @@ public class RSA {
 		setED(zero);
 	}
 
-	private void setPublicKey(BigInteger part1, BigInteger part2) {
+	public void setPublicKey(int part1, int part2) {
+		e = new BigInteger(part1 + "");
+		n = new BigInteger(part2 + "");
+
+	}
+
+	public void setPrivateKey(int key, int publicPart2) {
+		d = new BigInteger(key + "");
+		n = new BigInteger(publicPart2 + "");
+
+	}
+
+	public void setPublicKey(BigInteger part1, BigInteger part2) {
 		e = part1;
 		n = part2;
 
 	}
 
-	private void setPrivateKey(BigInteger key, BigInteger publicPart2) {
+	public void setPrivateKey(BigInteger key, BigInteger publicPart2) {
 		d = key;
 		n = publicPart2;
 
@@ -181,34 +193,95 @@ public class RSA {
 
 	// ---------------------- Access
 
+	/**
+	 * Uses the RSA encryption to encrypt a Number
+	 * <p>
+	 * The encrypted String has to include the spaces. If you want to decrypt it
+	 * don't remove them
+	 * 
+	 * @param number - the number to be encrypted as a String
+	 * @return encrypted number as a String
+	 */
 	public String encryptNumber(String number) {
 		return splitEncryptBigMath(splitENum(number));
 	}
 
+	/**
+	 * Uses the RSA encryption to encrypt a Number
+	 * <p>
+	 * The encrypted String has to include the spaces. If you want to decrypt it
+	 * don't remove them
+	 * 
+	 * @param number - the number to be encrypted as a Integer
+	 * @return encrypted number as a String
+	 */
 	public String encryptNumber(int number) {
 		return splitEncryptBigMath(splitENum("" + number));
 	}
 
+	/**
+	 * Uses the RSA encryption to encrypt a Number
+	 * <p>
+	 * The encrypted String has to include the spaces. If you want to decrypt it
+	 * don't remove them
+	 * 
+	 * @param number - the number to be encrypted as a BigInteger
+	 * @return encrypted number as a String
+	 */
 	public String encryptNumber(BigInteger number) {
 		return splitEncryptBigMath(splitENum(number.toString()));
 	}
 
+	/**
+	 * Uses the RSA encryption to decrypt a Number
+	 * 
+	 * @param encryptedNumber - the number to be decrypted as a String
+	 * @return decrypted number as a String
+	 */
 	public String decryptNumber(String encryptedNumber) {
 		return splitDecryptBigMath(splitDNum(encryptedNumber));
 	}
 
+	/**
+	 * 
+	 * WIP
+	 * 
+	 * @param text
+	 * @return
+	 */
 	public String encryptText(String text) {
 		return splitEncryptBigMath(splitEText(text));
 	}
 
+	/**
+	 * 
+	 * WIP
+	 * 
+	 * @param text
+	 * @return
+	 */
 	public String decryptText(String encryptedText) {
 		return splitDecryptTextBigMath(splitDText(encryptedText));
 	}
 
+	/**
+	 * 
+	 * WIP
+	 * 
+	 * @param text
+	 * @return
+	 */
 	public String encryptTextFullUTF8(String text) {
 		return splitEncryptBigMath(splitETextUTF8(text));
 	}
 
+	/**
+	 * 
+	 * WIP
+	 * 
+	 * @param text
+	 * @return
+	 */
 	public String decryptTextFullUTF8(String encryptedText) {
 		return splitDecryptTextBigMath(splitDText(encryptedText));
 	}
