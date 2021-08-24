@@ -9,7 +9,7 @@ public class RSA {
 
 	private BigInteger zero = BigInteger.ZERO, one = BigInteger.ONE;
 
-	public void generateKeys(BigInteger a, BigInteger b) {
+	private void generateKeysP(BigInteger a, BigInteger b) {
 		p1 = a;
 		p2 = b;
 		euler = (one.subtract(p1)).multiply(one.subtract(p2));
@@ -17,45 +17,12 @@ public class RSA {
 		setED(zero);
 	}
 
-	public void setPublicKey(int part1, int part2) {
-		e = new BigInteger(part1 + "");
-		n = new BigInteger(part2 + "");
-
-	}
-
-	public void setPrivateKey(int key, int publicPart2) {
-		d = new BigInteger(key + "");
-		n = new BigInteger(publicPart2 + "");
-
-	}
-
-	public void setPublicKey(BigInteger part1, BigInteger part2) {
-		e = part1;
-		n = part2;
-
-	}
-
-	public void setPrivateKey(BigInteger key, BigInteger publicPart2) {
-		d = key;
-		n = publicPart2;
-
-	}
-
-	public BigInteger[] getPublicKey() {
-		BigInteger[] temp = { e, n };
-		return temp;
-	}
-
-	public BigInteger getPrivateKey() {
-		return d;
-	}
-
 	private void setED(BigInteger skipNum) {
-		e = getE(skipNum);
-		d = getD();
+		e = makeE(skipNum);
+		d = makeD();
 	}
 
-	private BigInteger getE(BigInteger skipNum) {
+	private BigInteger makeE(BigInteger skipNum) {
 		BigInteger e = zero;
 		while (true) {
 			if (e.compareTo(one) == 1 && e.compareTo(euler) == -1 && ggt(e, euler).compareTo(one) == 0
@@ -65,7 +32,7 @@ public class RSA {
 		}
 	}
 
-	private BigInteger getD() {
+	private BigInteger makeD() {
 		BigInteger d = zero;
 		BigInteger s = zero;
 
@@ -97,7 +64,7 @@ public class RSA {
 		return Bi;
 	}
 
-	private String splitEncryptBigMath(String[] input) {
+	private String encrypt(String[] input) {
 		String s = "";
 
 		for (int i = 0; i < input.length; i++) {
@@ -109,7 +76,7 @@ public class RSA {
 
 	}
 
-	private String splitDecryptBigMath(String[] input) {
+	private String decrypt(String[] input) {
 		String s = "";
 
 		for (int i = 0; i < input.length; i++) {
@@ -120,14 +87,13 @@ public class RSA {
 
 	}
 
-	private String splitDecryptTextBigMath(String[] input) {
-		String s = "";
+	private String decryptText(String[] input, boolean UTF8) {
+		int cutLength = UTF8 ? 6 : 4;
+		String temp = decrypt(input), s = "";
 
-		for (int i = 0; i < input.length; i = i + 2) {
-			String one = bigMath(new BigInteger(input[i]), d, n).toString().replaceFirst("1", "");
-			String two = bigMath(new BigInteger(input[i + 1]), d, n).toString();
+		for (int i = 0; i < temp.length(); i = i + cutLength) {
+			s = s + Character.toChars(Integer.parseInt(temp.substring(i + 1, i + cutLength)))[0];
 
-			s = s + Character.toChars(Integer.parseInt(one + two))[0];
 		}
 
 		return s;
@@ -135,7 +101,7 @@ public class RSA {
 	}
 
 	private String[] splitENum(String input) {
-
+		// split number to be encrypted and not be bigger than n
 		ArrayList<String> list = new ArrayList<>();
 		String temp = "1";
 		for (int i = 0; i < input.length(); i++) {
@@ -150,48 +116,83 @@ public class RSA {
 
 	}
 
-	private String[] splitDNum(String input) {
-		return input.split(" ");
-	}
-
-	private String[] splitETextUTF8(String input) {
-		String[] temp = new String[input.length() * 2];
-		for (int i = 0; i < temp.length; i = i + 2) {
-			String tempString = "";
-
-			tempString = "" + input.codePointAt(i / 2);
-
-			while (tempString.length() < 5) {
-				tempString = 0 + tempString;
-			}
-			tempString = 1 + tempString;
-
-			temp[i] = tempString.substring(0, 3);
-			temp[i + 1] = tempString.substring(3, 6);
-		}
-		return temp;
-	}
-
-	private String[] splitEText(String input) {
-		String[] temp = new String[input.length()];
-		for (int i = 0; i < temp.length; i++) {
+	private String[] splitText(String input, boolean UTF8) {
+		// split text to be encrypted and not be bigger than n
+		int codeLength = UTF8 ? 5 : 3;
+		String temp = "";
+		for (int i = 0; i < input.length(); i++) {
 			String tempString = "";
 
 			tempString = "" + input.codePointAt(i);
 
-			tempString = 1 + tempString;
+			while (tempString.length() < codeLength) {
+				tempString = "0" + tempString;
+			}
 
-			temp[i] = tempString;
+			tempString = "1" + tempString;
+
+			temp = temp + tempString;
 
 		}
-		return temp;
+
+		// example: temp = 100510321078
+		return splitENum(temp);
 	}
 
-	private String[] splitDText(String input) {
+	private String[] splitEncryted(String input) {
 		return input.split(" ");
 	}
 
 	// ---------------------- Access
+
+	/**
+	 * 
+	 * Compacts the encrypted String of numbers to characters
+	 * <p>
+	 * It has to to decompacted again to decrypt it
+	 * 
+	 * @param encrytedString - encrypted string of numbers to be Compacted
+	 * @return - returns the encrypted String but compacted to characters
+	 */
+	public String compact(String encrytedString) {
+		String temp = "";
+
+		for (String s : encrytedString.split(" ")) {
+
+			for (int i = 0; i < s.length(); i = i + 4) {
+				String subString = "";
+				if ((i + 4) <= s.length()) {
+					subString = s.substring(i, i + 4);
+				} else {
+					subString = s.substring(i, s.length());
+				}
+
+				temp = temp + Character.toChars(Integer.parseInt("1" + subString))[0];
+			}
+			temp = temp + " ";
+		}
+		return temp;
+	}
+
+	/**
+	 * 
+	 * decompacts the compacted encrypted String
+	 * 
+	 * @param encrytedString - Compacted encrypted String
+	 * @return - returns the decompacted encrypted String that can be decrypted
+	 */
+	public String decompact(String compactedString) {
+		String temp = "";
+
+		for (String s : compactedString.split(" ")) {
+
+			for (int i = 0; i < s.length(); i++) {
+				temp = temp + ("" + s.codePointAt(i)).replaceFirst("1", "");
+			}
+			temp = temp + " ";
+		}
+		return temp.trim();
+	}
 
 	/**
 	 * Uses the RSA encryption to encrypt a Number
@@ -202,8 +203,9 @@ public class RSA {
 	 * @param number - the number to be encrypted as a String
 	 * @return encrypted number as a String
 	 */
+
 	public String encryptNumber(String number) {
-		return splitEncryptBigMath(splitENum(number));
+		return encrypt(splitENum(number));
 	}
 
 	/**
@@ -216,7 +218,7 @@ public class RSA {
 	 * @return encrypted number as a String
 	 */
 	public String encryptNumber(int number) {
-		return splitEncryptBigMath(splitENum("" + number));
+		return encrypt(splitENum("" + number));
 	}
 
 	/**
@@ -225,11 +227,11 @@ public class RSA {
 	 * The encrypted String has to include the spaces. If you want to decrypt it
 	 * don't remove them
 	 * 
-	 * @param number - the number to be encrypted as a BigInteger
+	 * @param number - the number to be encrypted as a {@link BigInteger}
 	 * @return encrypted number as a String
 	 */
 	public String encryptNumber(BigInteger number) {
-		return splitEncryptBigMath(splitENum(number.toString()));
+		return encrypt(splitENum(number.toString()));
 	}
 
 	/**
@@ -239,7 +241,7 @@ public class RSA {
 	 * @return decrypted number as a String
 	 */
 	public String decryptNumber(String encryptedNumber) {
-		return splitDecryptBigMath(splitDNum(encryptedNumber));
+		return decrypt(splitEncryted(encryptedNumber));
 	}
 
 	/**
@@ -250,7 +252,7 @@ public class RSA {
 	 * @return
 	 */
 	public String encryptText(String text) {
-		return splitEncryptBigMath(splitEText(text));
+		return encrypt(splitText(text, false));
 	}
 
 	/**
@@ -261,7 +263,7 @@ public class RSA {
 	 * @return
 	 */
 	public String decryptText(String encryptedText) {
-		return splitDecryptTextBigMath(splitDText(encryptedText));
+		return decryptText(splitEncryted(encryptedText), false);
 	}
 
 	/**
@@ -272,7 +274,7 @@ public class RSA {
 	 * @return
 	 */
 	public String encryptTextFullUTF8(String text) {
-		return splitEncryptBigMath(splitETextUTF8(text));
+		return encrypt(splitText(text, true));
 	}
 
 	/**
@@ -283,7 +285,98 @@ public class RSA {
 	 * @return
 	 */
 	public String decryptTextFullUTF8(String encryptedText) {
-		return splitDecryptTextBigMath(splitDText(encryptedText));
+		return decryptText(splitEncryted(encryptedText), true);
+	}
+
+	/**
+	 * Generates the private and public key with the given prime numbers
+	 * 
+	 * @param a - prime number as Integer
+	 * @param b - prime number as Integer
+	 */
+	public void generateKeys(int a, int b) {
+		generateKeysP(new BigInteger(a + ""), new BigInteger(b + ""));
+	}
+
+	/**
+	 * Generates the private and public key with the given prime numbers
+	 * 
+	 * @param a - prime number as {@link BigInteger}
+	 * @param b - prime number as {@link BigInteger}
+	 */
+	public void generateKeys(BigInteger a, BigInteger b) {
+		generateKeysP(a, b);
+	}
+
+	/**
+	 * Sets the Publickey
+	 * 
+	 * 
+	 * @param part1 - first part of the Public key (e) as Integer
+	 * @param part2 - second part of the Public key (n) as Integer
+	 */
+	public void setPublicKey(int part1, int part2) {
+		e = new BigInteger(part1 + "");
+		n = new BigInteger(part2 + "");
+
+	}
+
+	/**
+	 * Sets the Publickey
+	 * 
+	 * 
+	 * @param part1 - first part of the Public key (e) as {@link BigInteger}
+	 * @param part2 - second part of the Public key (n) as {@link BigInteger}
+	 */
+	public void setPublicKey(BigInteger part1, BigInteger part2) {
+		e = part1;
+		n = part2;
+
+	}
+
+	/**
+	 * Sets the Privatekey
+	 * 
+	 * 
+	 * @param key         - the private key (d) as Integer
+	 * @param publicPart2 - second part of the Public key (n) as Integer
+	 */
+	public void setPrivateKey(int key, int publicPart2) {
+		d = new BigInteger(key + "");
+		n = new BigInteger(publicPart2 + "");
+
+	}
+
+	/**
+	 * Sets the Privatekey
+	 * 
+	 * 
+	 * @param key         - the private key (d) as {@link BigInteger}
+	 * @param publicPart2 - second part of the Public key (n) as {@link BigInteger}
+	 */
+	public void setPrivateKey(BigInteger key, BigInteger publicPart2) {
+		d = key;
+		n = publicPart2;
+
+	}
+
+	/**
+	 * returns the Publickey tupel
+	 * 
+	 * @return - the Publickey tupel as BigInteger
+	 */
+	public BigInteger[] getPublicKey() {
+		BigInteger[] temp = { e, n };
+		return temp;
+	}
+
+	/**
+	 * returns the Privatekey
+	 * 
+	 * @return - the Privatekey as {@link BigInteger}
+	 */
+	public BigInteger getPrivateKey() {
+		return d;
 	}
 
 }

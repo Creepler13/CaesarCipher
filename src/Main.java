@@ -22,12 +22,17 @@ public class Main {
 
 		String text = "musik ist der atem der seele";
 		String encodedrsaText = k.rsa.encryptTextFullUTF8(text);
-		String decodedrsaText = k.rsa.decryptTextFullUTF8(encodedrsaText);
-
+		String compacted = k.rsa.compact(encodedrsaText);
+		String decompacted = k.rsa.decompact(compacted);
+		String decodedrsaText = k.rsa.decryptTextFullUTF8(decompacted);
+		
 		System.out.println("\nRSA Text");
 		System.out.println(text);
 		System.out.println(encodedrsaText);
+		System.out.println(compacted);
+		System.out.println(decompacted);
 		System.out.println(decodedrsaText);
+		
 
 		k.vigenere.setKey("senf");
 
